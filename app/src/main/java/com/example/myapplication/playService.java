@@ -281,8 +281,6 @@ public class playService extends Service {
                 }
             });
 
-
-
             Notification notification;
             notification = new NotificationCompat.Builder(context, "1")
                     .setSmallIcon(android.R.drawable.stat_sys_headset)

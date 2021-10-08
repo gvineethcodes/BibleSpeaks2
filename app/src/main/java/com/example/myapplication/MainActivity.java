@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -96,149 +95,65 @@ public class MainActivity extends AppCompatActivity {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
+        executor.execute(() -> {
 
-                //Background work here
+            //Background work here
 
-                HttpURLConnection conn;
-                try {
-                    String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
+            HttpURLConnection conn;
+            try {
+                String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
 
-                    URL url = new URL(urlString);
-                    conn = (HttpURLConnection) url.openConnection();
-                    InputStream in = conn.getInputStream();
-                    if(conn.getResponseCode() == 200)
-                    {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                        String inputLine;
-
-                        while ((inputLine = br.readLine()) != null) {
-                            String[] AS = inputLine.split("ALBUM");
-                            String artist = AS[0].replace(",","");
-                            Set<String> set1 = new HashSet<>();
-
-                            for(String as : AS){
-                                String albumName = " ",albumImage = " ";
-                                Set<String> set = new HashSet<>();
-                                String[] AS1 = as.split(",");
-                                if(AS1.length>1){
-                                    albumName = AS1[1];
-                                    albumImage = AS1[AS1.length-1];
-                                }
-                                for(int i =2;i<AS1.length-1;i++){
-                                    if(i%2==0) {
-                                        set.add(AS1[i]);
-                                    }
-                                    else {
-                                        keepString(artist+"/"+albumName+"/"+AS1[i-1],AS1[i]);
-                                    }
-                                }
-                                if(set.size()>0){
-                                    set1.add(albumName);
-                                    keepString(artist+"/"+albumName+"/image",albumImage);
-                                    keepStringSet(artist+"/"+albumName,set);
-                                }
-                            }
-                            keepStringSet(artist,set1);
-                            parentModelArrayList.add(new ParentModel(artist));
-                        }
-                        //runOnUiThread(() -> parentRecyclerView.setAdapter(ParentAdapter));
-                    }
-
-                }catch (Exception e){
-                    keepString("text", e.getMessage());
-                }
-
-
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        //UI Thread work here
-                        parentRecyclerView.setAdapter(ParentAdapter);
-                    }
-                });
-            }
-        });
-
-        /*
-
-        class ReadFile extends AsyncTask<String, Void, String> {
-
-            @Override
-            protected String doInBackground(String... params) {
-                HttpURLConnection conn = null;
-                try {
-                    String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
-
-                    URL url = new URL(urlString);
-                    conn = (HttpURLConnection) url.openConnection();
-                    InputStream in = conn.getInputStream();
-                    if(conn.getResponseCode() == 200)
-                    {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                        String inputLine;
-
-                        while ((inputLine = br.readLine()) != null) {
-                            //Log.e("mylog", inputLine + "\n" + artist.getArtist());
-                            //Log.e("mylog", ""+inputLine.startsWith(artist.getArtist()));
-                            String[] AS = inputLine.split("ALBUM");
-                            String artist = AS[0].replace(",","");
-                            Set<String> set1 = new HashSet<>();
-
-                            for(String as : AS){
-                                String albumName = " ",albumImage = " ";
-                                Set<String> set = new HashSet<>();
-                                String[] AS1 = as.split(",");
-                                if(AS1.length>1){
-                                    albumName = AS1[1];
-                                    albumImage = AS1[AS1.length-1];
-                                }
-                                for(int i =2;i<AS1.length-1;i++){
-                                    if(i%2==0) {
-                                        set.add(AS1[i]);
-                                    }
-                                    else {
-                                        keepString(artist+"/"+albumName+"/"+AS1[i-1],AS1[i]);
-                                    }
-                                }
-                                if(set.size()>0){
-                                    set1.add(albumName);
-                                    keepString(artist+"/"+albumName+"/image",albumImage);
-                                    keepStringSet(artist+"/"+albumName,set);
-                                }
-                            }
-                            keepStringSet(artist,set1);
-                            parentModelArrayList.add(new ParentModel(artist));
-                        }
-                        runOnUiThread(() -> parentRecyclerView.setAdapter(ParentAdapter));
-                    }
-
-                }catch (Exception e){
-                    keepString("text", e.getMessage());
-                }
-                finally
+                URL url = new URL(urlString);
+                conn = (HttpURLConnection) url.openConnection();
+                InputStream in = conn.getInputStream();
+                if(conn.getResponseCode() == 200)
                 {
-                    if(conn!=null)
-                        conn.disconnect();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                    String inputLine;
+
+                    while ((inputLine = br.readLine()) != null) {
+                        String[] AS = inputLine.split("ALBUM");
+                        String artist = AS[0].replace(",","");
+                        Set<String> set1 = new HashSet<>();
+
+                        for(String as : AS){
+                            String albumName = " ",albumImage = " ";
+                            Set<String> set = new HashSet<>();
+                            String[] AS1 = as.split(",");
+                            if(AS1.length>1){
+                                albumName = AS1[1];
+                                albumImage = AS1[AS1.length-1];
+                            }
+                            for(int i =2;i<AS1.length-1;i++){
+                                if(i%2==0) {
+                                    set.add(AS1[i]);
+                                }
+                                else {
+                                    keepString(artist+"/"+albumName+"/"+AS1[i-1],AS1[i]);
+                                }
+                            }
+                            if(set.size()>0){
+                                set1.add(albumName);
+                                keepString(artist+"/"+albumName+"/image",albumImage);
+                                keepStringSet(artist+"/"+albumName,set);
+                            }
+                        }
+                        keepStringSet(artist,set1);
+                        parentModelArrayList.add(new ParentModel(artist));
+                    }
+                    //runOnUiThread(() -> parentRecyclerView.setAdapter(ParentAdapter));
                 }
-                return null;
+
+            }catch (Exception e){
+                keepString("text", e.getMessage());
             }
 
-            @Override
-            protected void onPostExecute(String result) {
 
-            }
-
-            @Override
-            protected void onPreExecute() {}
-        }
-
-        new ReadFile().execute("");
-
-
-         */
+            handler.post(() -> {
+                //UI Thread work here
+                parentRecyclerView.setAdapter(ParentAdapter);
+            });
+        });
 
 
     }
