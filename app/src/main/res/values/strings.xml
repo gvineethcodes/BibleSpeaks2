@@ -5,6 +5,7 @@
     <string name="prev">prev</string>
     <string name="play">play</string>
     <string name="next">next</string>
-    <string name="textview">0 : 0 / 0 : 0\nPlaying Song</string>
+    <string name="textview">0 : 0</string>
     <string name="album">TextView</string>
+    <string name="playing_song">playing song</string>
 </resources>

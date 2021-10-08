@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     FloatingActionButton floatingActionButton,floatingActionButton2,floatingActionButton3;
     SeekBar seekBar;
-    TextView textView,textView2;
+    TextView textView,textView2,textView3,textView4;
     ImageView imageView;
 
     @Override
@@ -61,9 +61,11 @@ public class MainActivity extends AppCompatActivity {
         linearLayout = findViewById(R.id.LinearLayout);
         imageView = findViewById(R.id.imageView);
         textView2 = findViewById(R.id.textView2);
-        listView = findViewById(R.id.list);
-        textView = findViewById(R.id.textView);
+        textView = findViewById(R.id.textView3);
+        textView3 = findViewById(R.id.textView4);
+        textView4 = findViewById(R.id.textView);
         seekBar = findViewById(R.id.seekBar2);
+        listView = findViewById(R.id.list);
         floatingActionButton2 = findViewById(R.id.floatingActionButton);
         floatingActionButton = findViewById(R.id.floatingActionButton2);
         floatingActionButton3 = findViewById(R.id.floatingActionButton3);
@@ -256,7 +258,9 @@ public class MainActivity extends AppCompatActivity {
                     keepString("totalDuration","0 : 0");
                     seekBar.setProgress(0);
                 }
-                textView.setText(String.format("%s / %s\n%s", sharedpreferences.getString("currentDuration", "0 : 0"), sharedpreferences.getString("totalDuration", "0 : 0"), sharedpreferences.getString("text", " ")));
+                textView3.setText(String.format("   %s", sharedpreferences.getString("currentDuration", "0 : 0")));
+                textView4.setText(sharedpreferences.getString("totalDuration", "0 : 0"));
+                textView.setText(sharedpreferences.getString("text", " "));
                 handler.postDelayed(this, 500);
             }
         }, 0);
@@ -289,9 +293,7 @@ public class MainActivity extends AppCompatActivity {
             keepString("image",sharedpreferences.getString(album+"/image",""));
             keepString("url",sharedpreferences.getString(album+"/"+topic,""));
 
-            //keepString("play", sharedpreferences.getString("album"," ")+"/"+adapterView.getItemAtPosition(i));
             playService.getInstance().playpause(MainActivity.this);
-            //Log.i("tttS", sharedpreferences.getString("list"," ")+"/"+adapterView.getItemAtPosition(i));
         });
 
     }
