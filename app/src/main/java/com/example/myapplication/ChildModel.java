@@ -1,8 +1,5 @@
 package com.example.myapplication;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class ChildModel {
     private String artist, albumName, albumImage;
 

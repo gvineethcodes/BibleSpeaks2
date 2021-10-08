@@ -3,7 +3,6 @@ package com.example.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,22 +80,14 @@ public class ChildRecyclerViewAdapter extends RecyclerView.Adapter<ChildRecycler
         }
 
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ChildModel currentItem = childModelArrayList.get(holder.getAdapterPosition());
-                keepString("album", currentItem.getArtist()+"/"+currentItem.getAlbumName());
+        holder.itemView.setOnClickListener(view -> {
+            ChildModel currentItem = childModelArrayList.get(holder.getAdapterPosition());
+            keepString("album", currentItem.getArtist()+"/"+currentItem.getAlbumName());
 
-                Intent Bintent = new Intent("UI");
-                Bintent.putExtra("key", "visibility");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(Bintent);
+            Intent Bintent = new Intent("UI");
+            Bintent.putExtra("key", "visibility");
+            LocalBroadcastManager.getInstance(context).sendBroadcast(Bintent);
 
-                //keepString("img", currentItem.getHeroImage());
-
-                //cxt.startActivity(new Intent(cxt, MainActivity2.class));
-
-                //Toast.makeText(cxt, currentItem.getArtist()+currentItem.getMovieName(), Toast.LENGTH_SHORT).show();
-            }
         });
     }
 

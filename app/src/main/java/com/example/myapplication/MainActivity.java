@@ -1,8 +1,6 @@
 package com.example.myapplication;
 
 import static com.example.myapplication.playService.mediaPlayer;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,10 +16,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,9 +36,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedpreferences;
@@ -95,11 +93,16 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(this, playService.class));
         }
 
-        class ReadFile extends AsyncTask<String, Void, String> {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
 
+        executor.execute(new Runnable() {
             @Override
-            protected String doInBackground(String... params) {
-                HttpURLConnection conn = null;
+            public void run() {
+
+                //Background work here
+
+                HttpURLConnection conn;
                 try {
                     String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
 
@@ -112,15 +115,13 @@ public class MainActivity extends AppCompatActivity {
                         String inputLine;
 
                         while ((inputLine = br.readLine()) != null) {
-                            //Log.e("mylog", inputLine + "\n" + artist.getArtist());
-                            //Log.e("mylog", ""+inputLine.startsWith(artist.getArtist()));
                             String[] AS = inputLine.split("ALBUM");
                             String artist = AS[0].replace(",","");
-                            Set<String> set1 = new HashSet<String>();
+                            Set<String> set1 = new HashSet<>();
 
                             for(String as : AS){
                                 String albumName = " ",albumImage = " ";
-                                Set<String> set = new HashSet<String>();
+                                Set<String> set = new HashSet<>();
                                 String[] AS1 = as.split(",");
                                 if(AS1.length>1){
                                     albumName = AS1[1];
@@ -143,12 +144,75 @@ public class MainActivity extends AppCompatActivity {
                             keepStringSet(artist,set1);
                             parentModelArrayList.add(new ParentModel(artist));
                         }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                parentRecyclerView.setAdapter(ParentAdapter);
+                        //runOnUiThread(() -> parentRecyclerView.setAdapter(ParentAdapter));
+                    }
+
+                }catch (Exception e){
+                    keepString("text", e.getMessage());
+                }
+
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        //UI Thread work here
+                        parentRecyclerView.setAdapter(ParentAdapter);
+                    }
+                });
+            }
+        });
+
+        /*
+
+        class ReadFile extends AsyncTask<String, Void, String> {
+
+            @Override
+            protected String doInBackground(String... params) {
+                HttpURLConnection conn = null;
+                try {
+                    String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
+
+                    URL url = new URL(urlString);
+                    conn = (HttpURLConnection) url.openConnection();
+                    InputStream in = conn.getInputStream();
+                    if(conn.getResponseCode() == 200)
+                    {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                        String inputLine;
+
+                        while ((inputLine = br.readLine()) != null) {
+                            //Log.e("mylog", inputLine + "\n" + artist.getArtist());
+                            //Log.e("mylog", ""+inputLine.startsWith(artist.getArtist()));
+                            String[] AS = inputLine.split("ALBUM");
+                            String artist = AS[0].replace(",","");
+                            Set<String> set1 = new HashSet<>();
+
+                            for(String as : AS){
+                                String albumName = " ",albumImage = " ";
+                                Set<String> set = new HashSet<>();
+                                String[] AS1 = as.split(",");
+                                if(AS1.length>1){
+                                    albumName = AS1[1];
+                                    albumImage = AS1[AS1.length-1];
+                                }
+                                for(int i =2;i<AS1.length-1;i++){
+                                    if(i%2==0) {
+                                        set.add(AS1[i]);
+                                    }
+                                    else {
+                                        keepString(artist+"/"+albumName+"/"+AS1[i-1],AS1[i]);
+                                    }
+                                }
+                                if(set.size()>0){
+                                    set1.add(albumName);
+                                    keepString(artist+"/"+albumName+"/image",albumImage);
+                                    keepStringSet(artist+"/"+albumName,set);
+                                }
                             }
-                        });
+                            keepStringSet(artist,set1);
+                            parentModelArrayList.add(new ParentModel(artist));
+                        }
+                        runOnUiThread(() -> parentRecyclerView.setAdapter(ParentAdapter));
                     }
 
                 }catch (Exception e){
@@ -172,6 +236,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         new ReadFile().execute("");
+
+
+         */
+
+
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -252,26 +321,11 @@ public class MainActivity extends AppCompatActivity {
             floatingActionButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
         }
 
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                playService.getInstance().playpause(MainActivity.this);
-            }
-        });
+        floatingActionButton.setOnClickListener(view -> playService.getInstance().playpause(MainActivity.this));
 
-        floatingActionButton2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                playService.getInstance().prev(MainActivity.this);
-            }
-        });
+        floatingActionButton2.setOnClickListener(view -> playService.getInstance().prev(MainActivity.this));
 
-        floatingActionButton3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                playService.getInstance().next(MainActivity.this);
-            }
-        });
+        floatingActionButton3.setOnClickListener(view -> playService.getInstance().next(MainActivity.this));
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -287,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
                     keepString("totalDuration","0 : 0");
                     seekBar.setProgress(0);
                 }
-                textView.setText(sharedpreferences.getString("currentDuration","0 : 0")+" / "+sharedpreferences.getString("totalDuration","0 : 0")+"\n"+sharedpreferences.getString("text"," "));
+                textView.setText(String.format("%s / %s\n%s", sharedpreferences.getString("currentDuration", "0 : 0"), sharedpreferences.getString("totalDuration", "0 : 0"), sharedpreferences.getString("text", " ")));
                 handler.postDelayed(this, 500);
             }
         }, 0);
@@ -309,23 +363,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        listView.setOnItemClickListener((adapterView, view, i, l) -> {
 
-                String album = sharedpreferences.getString("album","");
+            String album = sharedpreferences.getString("album","");
 
-                String topic = ""+adapterView.getItemAtPosition(i);
+            String topic = ""+adapterView.getItemAtPosition(i);
 
-                keepString("topic",topic);
-                keepString("subject", album);
-                keepString("image",sharedpreferences.getString(album+"/image",""));
-                keepString("url",sharedpreferences.getString(album+"/"+topic,""));
+            keepString("topic",topic);
+            keepString("subject", album);
+            keepString("image",sharedpreferences.getString(album+"/image",""));
+            keepString("url",sharedpreferences.getString(album+"/"+topic,""));
 
-                //keepString("play", sharedpreferences.getString("album"," ")+"/"+adapterView.getItemAtPosition(i));
-                playService.getInstance().playpause(MainActivity.this);
-                //Log.i("tttS", sharedpreferences.getString("list"," ")+"/"+adapterView.getItemAtPosition(i));
-            }
+            //keepString("play", sharedpreferences.getString("album"," ")+"/"+adapterView.getItemAtPosition(i));
+            playService.getInstance().playpause(MainActivity.this);
+            //Log.i("tttS", sharedpreferences.getString("list"," ")+"/"+adapterView.getItemAtPosition(i));
         });
 
     }

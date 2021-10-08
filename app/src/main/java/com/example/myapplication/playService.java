@@ -10,17 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -29,17 +24,12 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 
 
 public class playService extends Service {
-    //StorageReference mStorageRef;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor;
     public static playService playServiceInstance;
@@ -138,15 +128,6 @@ public class playService extends Service {
         }
 
         try {
-            //if(sharedpreferences.getString(sharedpreferences.getString("play", "/None/None/None"), "/None/None/None").contains("http"))
-            {
-                //String[] splitStr = sharedpreferences.getString("play", "/None/None/None").split("/");
-                //Log.i("ttt",""+ tutorials.indexOf(splitStr[2]));
-
-                //Log.i("ttts",splitStr[0]+" "+splitStr[1]+" "+splitStr[2]);
-//                keepString("topic",splitStr[2]);
-//                keepString("subject",splitStr[0]+"/"+splitStr[1] );
-//                keepString("img",sharedpreferences.getString(sharedpreferences.getString("subject"," ")+"/image"," "));
 
                 String topic = sharedpreferences.getString("topic"," ");
                 String urlString = sharedpreferences.getString("url"," ");
@@ -198,8 +179,6 @@ public class playService extends Service {
                     return false;
                 });
 
-            }
-
         } catch (IOException e) {
             keepString("text", e.getMessage());
         }
@@ -245,7 +224,7 @@ public class playService extends Service {
         }
     }
 
-    Bitmap img ;
+    //Bitmap img ;
 
     @SuppressLint("UnspecifiedImmutableFlag")
     public void showNotification(Context context, boolean showButtons, int playPause) {
@@ -255,7 +234,7 @@ public class playService extends Service {
         //subject = sharedpreferences.getString("subject", " ");
         if (!showButtons) {
 
-            img = null;
+            //img = null;
 
             Notification notification = new NotificationCompat.Builder(context, "1")
                     .setSmallIcon(android.R.drawable.stat_sys_headset)
@@ -269,11 +248,24 @@ public class playService extends Service {
             notificationManager.notify(1, notification);
 
 
+
+        } else {
+            final Bitmap[] img = new Bitmap[1];
+            Intent playI, prevI, nextI;
+            PendingIntent playPI, prevPI, nextPI;
+            playI = new Intent(context, playService.class).setAction("playPause");
+            prevI = new Intent(context, playService.class).setAction("prev");
+            nextI = new Intent(context, playService.class).setAction("next");
+
+            playPI = PendingIntent.getService(context, 2, playI, PendingIntent.FLAG_UPDATE_CURRENT);
+            prevPI = PendingIntent.getService(context, 3, prevI, PendingIntent.FLAG_UPDATE_CURRENT);
+            nextPI = PendingIntent.getService(context, 4, nextI, PendingIntent.FLAG_UPDATE_CURRENT);
+
             Picasso.get().load(sharedpreferences.getString("image"," ")).into(new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     try {
-                        img = bitmap;
+                        img[0] = bitmap;
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -290,22 +282,11 @@ public class playService extends Service {
             });
 
 
-        } else {
 
-            Intent playI, prevI, nextI;
-            PendingIntent playPI, prevPI, nextPI;
-            playI = new Intent(context, playService.class).setAction("playPause");
-            prevI = new Intent(context, playService.class).setAction("prev");
-            nextI = new Intent(context, playService.class).setAction("next");
-
-            playPI = PendingIntent.getService(context, 2, playI, PendingIntent.FLAG_UPDATE_CURRENT);
-            prevPI = PendingIntent.getService(context, 3, prevI, PendingIntent.FLAG_UPDATE_CURRENT);
-            nextPI = PendingIntent.getService(context, 4, nextI, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Notification notification = null;
+            Notification notification;
             notification = new NotificationCompat.Builder(context, "1")
                     .setSmallIcon(android.R.drawable.stat_sys_headset)
-                    .setLargeIcon(img)
+                    .setLargeIcon(img[0])
                     .setContentTitle(sharedpreferences.getString("subject","None"))
                     .setContentText(sharedpreferences.getString("text", " "))
                     .setContentIntent(contentIntent)
@@ -351,18 +332,8 @@ public class playService extends Service {
 
     }
 
-    private void keepInt(String key, int value) {
-        editor.putInt(key, value);
-        editor.apply();
-    }
-
     private void keepString(String keyStr1, String valueStr1) {
         editor.putString(keyStr1, valueStr1);
-        editor.apply();
-    }
-
-    private void keepBool(String key, boolean value) {
-        editor.putBoolean(key, value);
         editor.apply();
     }
 

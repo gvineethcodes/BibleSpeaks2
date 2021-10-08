@@ -1,11 +1,6 @@
 package com.example.myapplication;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,16 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Set;
 
 public class ParentRecyclerViewAdapter extends RecyclerView.Adapter<ParentRecyclerViewAdapter.MyViewHolder> {
@@ -81,85 +68,6 @@ public class ParentRecyclerViewAdapter extends RecyclerView.Adapter<ParentRecycl
             String albumImage = sharedpreferences.getString(artist.getArtist()+"/"+album+"/image","");
             arrayList.add(new ChildModel(artist.getArtist(), album, albumImage));
         }
-
-/*
-        class ReadFile extends AsyncTask<String, Void, String> {
-
-            @Override
-            protected String doInBackground(@NonNull String... params) {
-                HttpURLConnection conn = null;
-                try {
-                    String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
-
-                    URL url = new URL(urlString);
-                    conn = (HttpURLConnection) url.openConnection();
-                    InputStream in = conn.getInputStream();
-
-                    if(conn.getResponseCode() == 200)
-                    {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
-                        String inputLine;
-                        while ((inputLine = br.readLine()) != null) {
-                            //Log.e("mylog", inputLine + "\n" + artist.getArtist());
-                            //Log.e("mylog", ""+inputLine.startsWith(artist.getArtist()));
-                            String[] AS = inputLine.split("ALBUM");
-
-                            for(String as : AS){
-                                String albumName = " ",albumImage = " ";
-                                ArrayList<String> albumItems = new ArrayList<>();
-                                HashMap<String, String> albumItemLinks = new HashMap<>();
-                                String[] AS1 = as.split(",");
-                                if(AS1.length>1){
-                                    albumName = AS1[1];
-                                    albumImage = AS1[AS1.length-1];
-                                }
-                                for(int i =2;i<AS1.length-1;i++){
-                                    if(i%2==0) {
-                                        albumItems.add(AS1[i]);
-                                    }
-                                    else {
-                                        albumItemLinks.put(AS1[i-1],AS1[i]);
-                                    }
-
-                                }
-
-                                if(albumItems.size()>0)
-                                    arrayList.add(new ChildModel(artist.getArtist(), albumName, albumImage, albumItems, albumItemLinks));
-//                                new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        holder.childRecyclerView.setAdapter(childRecyclerViewAdapter);
-//                                    }
-//                                });
-                            }
-
-                        }
-
-                    }
-                }catch (Exception e){
-                    Log.e("mylog", e.toString());
-                }
-                finally
-                {
-                    if(conn!=null)
-                        conn.disconnect();
-                }
-                return null;
-            }
-            @Override
-            protected void onPostExecute(String result) {
-
-            }
-
-            @Override
-            protected void onPreExecute() {}
-
-        }
-
-        new ReadFile().execute("");
-*/
-
     }
 
     @Override
