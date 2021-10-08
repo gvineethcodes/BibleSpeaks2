@@ -80,12 +80,6 @@ public class MainActivity extends AppCompatActivity {
         ParentRecyclerViewAdapter ParentAdapter = new ParentRecyclerViewAdapter(parentModelArrayList, MainActivity.this);
         parentRecyclerView.setAdapter(ParentAdapter);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(new Intent(this, playService.class));
-        }else {
-            startService(new Intent(this, playService.class));
-        }
-
         sharedpreferences = getSharedPreferences("" + R.string.app_name, MODE_PRIVATE);
         editor = sharedpreferences.edit();
 
@@ -93,6 +87,12 @@ public class MainActivity extends AppCompatActivity {
             floatingActionButton.setEnabled(false);
             floatingActionButton2.setEnabled(false);
             floatingActionButton3.setEnabled(false);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(this, playService.class));
+        }else {
+            startService(new Intent(this, playService.class));
         }
 
         class ReadFile extends AsyncTask<String, Void, String> {
@@ -197,26 +197,19 @@ public class MainActivity extends AppCompatActivity {
                     case "visibility":
                         parentRecyclerView.setVisibility(View.INVISIBLE);
                         linearLayout.setVisibility(View.VISIBLE);
-
                         String album = sharedpreferences.getString("album","");
                         Picasso.get()
                                 .load(sharedpreferences.getString(album+"/image",""))
                                 .into(imageView);
-
                         String[] splitStr = album.split("/");
                         textView2.setText(splitStr[1]);
-
                         Set<String> set = sharedpreferences.getStringSet(album, null);
-
                         ArrayList<String> albumItems = new ArrayList<>(set);
-
                         Collections.sort(albumItems);
-
                         ArrayAdapter<String> adapter=new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, albumItems){
                             @Override
                             public View getView(int position, View convertView, ViewGroup parent) {
                                 View view =super.getView(position, convertView, parent);
-
                                 TextView textView=(TextView) view.findViewById(android.R.id.text1);
                                 textView.setTextColor(Color.WHITE);
                                 return view;

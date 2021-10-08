@@ -150,7 +150,7 @@ public class playService extends Service {
 
                 String topic = sharedpreferences.getString("topic"," ");
                 String urlString = sharedpreferences.getString("url"," ");
-
+                keepString("totalDuration","0 : 0");
                 keepString("text", "preparing " + topic);
 
                 showNotification(context, false, R.drawable.ic_baseline_play_arrow_24);
