@@ -6,6 +6,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +37,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
     SeekBar seekBar;
     TextView textView,textView2,textView3,textView4;
     ImageView imageView;
+    public static AlarmManager staticAlarmManager;
+    public static Intent staticIntent;
+    public static PendingIntent staticPendingIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }catch (Exception e){
-                keepString("text", e.getMessage());
+                keepString("noInternet", e.getMessage());
             }
 
 
@@ -157,7 +164,18 @@ public class MainActivity extends AppCompatActivity {
             });
         });
 
+        if (sharedpreferences.getBoolean("one", true)) {
 
+            setAlarming(this);
+            keepBool("one",false);
+
+        }
+        Calendar calendar = Calendar.getInstance();
+
+        if (sharedpreferences.getBoolean("checkBox", true) && staticPendingIntent == null && staticAlarmManager == null && calendar.get(Calendar.HOUR_OF_DAY)<22) {
+            setAlarming(this);
+            //Toast.makeText(this, "a", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -260,7 +278,14 @@ public class MainActivity extends AppCompatActivity {
                 }
                 textView3.setText(String.format("   %s", sharedpreferences.getString("currentDuration", "0 : 0")));
                 textView4.setText(sharedpreferences.getString("totalDuration", "0 : 0"));
-                textView.setText(sharedpreferences.getString("text", " "));
+
+                if(sharedpreferences.getString("url","").contains("http"))
+                    textView.setText(sharedpreferences.getString("text", "play"));
+                else if(sharedpreferences.getString("noInternet","").contains("docs.google.com"))
+                    textView.setText("No Internet");
+                else textView.setText(sharedpreferences.getString("noInternet", " "));
+
+
                 handler.postDelayed(this, 500);
             }
         }, 0);
@@ -308,6 +333,11 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    private void keepBool(String key, boolean value){
+        editor.putBoolean(key,value);
+        editor.apply();
+    }
+
     @Override
     public void onBackPressed() {
         if(linearLayout.getVisibility()==View.VISIBLE){
@@ -322,5 +352,45 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         lbm.unregisterReceiver(receiver);
+    }
+
+    @SuppressLint("UnspecifiedImmutableFlag")
+    public static void setAlarming(Context context){
+
+        staticIntent = new Intent(context, playBackground.class).setAction("alarm");
+
+        staticPendingIntent = PendingIntent.getBroadcast(context, 0, staticIntent, 0);
+
+        staticAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+
+        Calendar calendar = Calendar.getInstance();
+
+        if (calendar.get(Calendar.HOUR_OF_DAY) <=2) {
+            calendar.set(Calendar.HOUR_OF_DAY, 4);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+        } else if((calendar.get(Calendar.HOUR_OF_DAY) >= 3 && calendar.get(Calendar.HOUR_OF_DAY) <= 6) || (calendar.get(Calendar.HOUR_OF_DAY) >= 16 && calendar.get(Calendar.HOUR_OF_DAY) <= 21)) {
+            calendar.set(Calendar.HOUR_OF_DAY, (calendar.get(Calendar.HOUR_OF_DAY) + 1));
+            //calendar.set(Calendar.MINUTE, (calendar.get(Calendar.MINUTE) + 2));
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+        } else if(calendar.get(Calendar.HOUR_OF_DAY) >= 7 && calendar.get(Calendar.HOUR_OF_DAY) <= 15) {
+            calendar.set(Calendar.HOUR_OF_DAY, 17);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+        } else{
+            calendar.set(Calendar.DAY_OF_WEEK,(calendar.get(Calendar.DAY_OF_WEEK) + 1));
+            calendar.set(Calendar.HOUR_OF_DAY, 4);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            staticAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), staticPendingIntent);
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            staticAlarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), staticPendingIntent);
+        else
+            staticAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), staticPendingIntent);
+
     }
 }

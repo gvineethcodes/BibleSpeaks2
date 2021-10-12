@@ -315,6 +315,7 @@ public class playService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        if(sharedpreferences.getString("text","play").startsWith("preparing")) keepString("text","play");
     }
 
     @Override
