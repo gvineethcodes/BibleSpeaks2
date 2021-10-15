@@ -86,7 +86,7 @@ public class playService extends Service {
             }
 
         } catch (Exception e) {
-            keepString("text", e.getMessage());
+            keepString("text", "P-89\n"+e.getMessage());
         }
 
         return START_STICKY;
@@ -132,7 +132,7 @@ public class playService extends Service {
                 String topic = sharedpreferences.getString("topic"," ");
                 String urlString = sharedpreferences.getString("url"," ");
                 keepString("totalDuration","0 : 0");
-                keepString("text", "preparing chapter - " + Integer.valueOf(topic));
+                keepString("text", "preparing " + topic);
 
                 showNotification(context, false, R.drawable.ic_baseline_play_arrow_24);
                 mediaPlayer = new MediaPlayer();
@@ -155,7 +155,7 @@ public class playService extends Service {
                     Bintent.putExtra("key", "PauseMax");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(Bintent);
 
-                    keepString("text", "chapter - "+Integer.valueOf(topic));
+                    keepString("text", topic);
                     showNotification(context, true, R.drawable.ic_baseline_pause_24);
 
                 });
@@ -172,7 +172,7 @@ public class playService extends Service {
                     Bintent.putExtra("key", "playImg");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(Bintent);
 
-                    keepString("text", "Try again chapter - " + Integer.valueOf(topic));
+                    keepString("text", "Try again " + topic);
                     showNotification(context, true, R.drawable.ic_baseline_play_arrow_24);
 
                     return false;

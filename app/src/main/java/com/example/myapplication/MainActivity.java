@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -105,12 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
         checkBox.setChecked(sharedpreferences.getBoolean("checkBox",true));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(new Intent(this, playService.class));
-        }else {
-            startService(new Intent(this, playService.class));
-        }
-
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -182,6 +175,12 @@ public class MainActivity extends AppCompatActivity {
             });
         });
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(this, playService.class));
+        }else {
+            startService(new Intent(this, playService.class));
+        }
+
         if (sharedpreferences.getBoolean("one", true)) {
 
             setAlarming(this);
@@ -233,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public View getView(int position, View convertView, ViewGroup parent) {
                                 View view =super.getView(position, convertView, parent);
-                                TextView textView=(TextView) view.findViewById(android.R.id.text1);
+                                TextView textView= view.findViewById(android.R.id.text1);
                                 textView.setTextColor(Color.WHITE);
                                 return view;
                             }
@@ -301,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                 if(sharedpreferences.getString("url","").contains("http"))
                     textView.setText(sharedpreferences.getString("text", "play"));
                 else if(sharedpreferences.getString("noInternet","").contains("docs.google.com"))
-                    textView.setText("No Internet");
+                    textView.setText(String.format("   %s","No Internet"));
                 else textView.setText(sharedpreferences.getString("noInternet", " "));
 
 
@@ -340,14 +339,11 @@ public class MainActivity extends AppCompatActivity {
             playService.getInstance().playpause(MainActivity.this);
         });
 
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                keepBool("checkBox",b);
-                if(b) setAlarming(MainActivity.this);
-                else if (staticPendingIntent != null && staticAlarmManager != null)
-                    staticAlarmManager.cancel(staticPendingIntent);
-            }
+        checkBox.setOnCheckedChangeListener((compoundButton, b) -> {
+            keepBool("checkBox",b);
+            if(b) setAlarming(MainActivity.this);
+            else if (staticPendingIntent != null && staticAlarmManager != null)
+                staticAlarmManager.cancel(staticPendingIntent);
         });
 
         button.setOnClickListener(view -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sharedpreferences.getString("updateUrl","http://www.google.com")))));
