@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,9 @@ import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -55,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     SeekBar seekBar;
     TextView textView,textView2,textView3,textView4;
     ImageView imageView;
+    Button button;
+    CheckBox checkBox;
     public static AlarmManager staticAlarmManager;
     public static Intent staticIntent;
     public static PendingIntent staticPendingIntent;
@@ -76,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton2 = findViewById(R.id.floatingActionButton);
         floatingActionButton = findViewById(R.id.floatingActionButton2);
         floatingActionButton3 = findViewById(R.id.floatingActionButton3);
+        button = findViewById(R.id.button);
+        checkBox = findViewById(R.id.checkBox);
 
         linearLayout.setVisibility(View.INVISIBLE);
 
@@ -95,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
             floatingActionButton3.setEnabled(false);
         }
 
+        checkBox.setChecked(sharedpreferences.getBoolean("checkBox",true));
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(new Intent(this, playService.class));
         }else {
@@ -110,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
 
             HttpURLConnection conn;
             try {
-                String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
+                String urlString = "https://docs.google.com/spreadsheets/d/1TuWYSw3pY0eWaNmcEuRUtWyHCg5D8UelAQ6b-MZEF0I/export?format=csv";
+//                String urlString = "https://docs.google.com/spreadsheets/d/1VxQruR4Yt1Ive6qLqQZ2iV7qCr4x9GRL49yA9XM5GP8/export?format=csv";
 
                 URL url = new URL(urlString);
                 conn = (HttpURLConnection) url.openConnection();
@@ -121,40 +132,47 @@ public class MainActivity extends AppCompatActivity {
                     String inputLine;
 
                     while ((inputLine = br.readLine()) != null) {
-                        String[] AS = inputLine.split("ALBUM");
-                        String artist = AS[0].replace(",","");
-                        Set<String> set1 = new HashSet<>();
+                        if(!inputLine.startsWith("update")) {
+                            String[] AS = inputLine.split("ALBUM");
+                            String artist = AS[0].replace(",", "");
+                            Set<String> set1 = new HashSet<>();
 
-                        for(String as : AS){
-                            String albumName = " ",albumImage = " ";
-                            Set<String> set = new HashSet<>();
-                            String[] AS1 = as.split(",");
-                            if(AS1.length>1){
-                                albumName = AS1[1];
-                                albumImage = AS1[AS1.length-1];
-                            }
-                            for(int i =2;i<AS1.length-1;i++){
-                                if(i%2==0) {
-                                    set.add(AS1[i]);
+                            for (String as : AS) {
+                                String albumName = " ", albumImage = " ";
+                                Set<String> set = new HashSet<>();
+                                String[] AS1 = as.split(",");
+                                if (AS1.length > 1) {
+                                    albumName = AS1[1];
+                                    albumImage = AS1[AS1.length - 1];
                                 }
-                                else {
-                                    keepString(artist+"/"+albumName+"/"+AS1[i-1],AS1[i]);
+                                for (int i = 2; i < AS1.length - 1; i++) {
+                                    if (i % 2 == 0) {
+                                        set.add(AS1[i]);
+                                    } else {
+                                        keepString(artist + "/" + albumName + "/" + AS1[i - 1], AS1[i]);
+                                    }
+                                }
+                                if (set.size() > 0) {
+                                    set1.add(albumName);
+                                    keepString(artist + "/" + albumName + "/image", albumImage);
+                                    keepStringSet(artist + "/" + albumName, set);
                                 }
                             }
-                            if(set.size()>0){
-                                set1.add(albumName);
-                                keepString(artist+"/"+albumName+"/image",albumImage);
-                                keepStringSet(artist+"/"+albumName,set);
-                            }
+                            keepStringSet(artist, set1);
+                            parentModelArrayList.add(new ParentModel(artist));
+                        }else {
+                            String[] splitStr = inputLine.split(",");
+                            keepFloat(Float.parseFloat(splitStr[1]));
+                            keepString("updateUrl",splitStr[2]);
+                            button.setVisibility(1.0 < sharedpreferences.getFloat("version", (float) -1.0) ? View.VISIBLE : View.INVISIBLE);
+
                         }
-                        keepStringSet(artist,set1);
-                        parentModelArrayList.add(new ParentModel(artist));
                     }
                     //runOnUiThread(() -> parentRecyclerView.setAdapter(ParentAdapter));
                 }
 
             }catch (Exception e){
-                keepString("noInternet", e.getMessage());
+                keepString("noInternet", "M-158\n"+e.getMessage());
             }
 
 
@@ -176,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
             setAlarming(this);
             //Toast.makeText(this, "a", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -314,13 +333,30 @@ public class MainActivity extends AppCompatActivity {
             String topic = ""+adapterView.getItemAtPosition(i);
 
             keepString("topic",topic);
-            keepString("subject", album);
+            keepString("subject", album.substring(album.indexOf("/")+1));
             keepString("image",sharedpreferences.getString(album+"/image",""));
             keepString("url",sharedpreferences.getString(album+"/"+topic,""));
 
             playService.getInstance().playpause(MainActivity.this);
         });
 
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                keepBool("checkBox",b);
+                if(b) setAlarming(MainActivity.this);
+                else if (staticPendingIntent != null && staticAlarmManager != null)
+                    staticAlarmManager.cancel(staticPendingIntent);
+            }
+        });
+
+        button.setOnClickListener(view -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sharedpreferences.getString("updateUrl","http://www.google.com")))));
+
+    }
+
+    private void keepFloat(float value) {
+        editor.putFloat("version", value);
+        editor.apply();
     }
 
     private void keepStringSet(String keyStr1, Set<String> valueStr1) {

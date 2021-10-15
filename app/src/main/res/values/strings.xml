@@ -8,4 +8,6 @@
     <string name="textview">0 : 0</string>
     <string name="album">TextView</string>
     <string name="playing_song">playing song</string>
+    <string name="text">Read at 4am-7am, 5pm-10pm</string>
+    <string name="button">update</string>
 </resources>

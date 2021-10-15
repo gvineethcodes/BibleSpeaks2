@@ -132,7 +132,7 @@ public class playService extends Service {
                 String topic = sharedpreferences.getString("topic"," ");
                 String urlString = sharedpreferences.getString("url"," ");
                 keepString("totalDuration","0 : 0");
-                keepString("text", "preparing " + topic);
+                keepString("text", "preparing chapter - " + Integer.valueOf(topic));
 
                 showNotification(context, false, R.drawable.ic_baseline_play_arrow_24);
                 mediaPlayer = new MediaPlayer();
@@ -147,7 +147,6 @@ public class playService extends Service {
                 mediaPlayer.setDataSource(urlString);
                 mediaPlayer.prepareAsync();
 
-
                 mediaPlayer.setOnPreparedListener(mediaPlayer -> {
                     mediaPlayer.start();
 
@@ -156,7 +155,7 @@ public class playService extends Service {
                     Bintent.putExtra("key", "PauseMax");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(Bintent);
 
-                    keepString("text", topic);
+                    keepString("text", "chapter - "+Integer.valueOf(topic));
                     showNotification(context, true, R.drawable.ic_baseline_pause_24);
 
                 });
@@ -173,14 +172,14 @@ public class playService extends Service {
                     Bintent.putExtra("key", "playImg");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(Bintent);
 
-                    keepString("text", "Try again " + topic);
+                    keepString("text", "Try again chapter - " + Integer.valueOf(topic));
                     showNotification(context, true, R.drawable.ic_baseline_play_arrow_24);
 
                     return false;
                 });
 
         } catch (IOException e) {
-            keepString("text", e.getMessage());
+            keepString("text", "P-183\n"+e.getMessage());
         }
 
     }
@@ -196,7 +195,7 @@ public class playService extends Service {
             int prev = albumItems.indexOf(topic) - 1;
             if (prev > -1) {
                 keepString("topic",albumItems.get(prev));
-                keepString("subject", album);
+                keepString("subject", album.substring(album.indexOf("/")+1));
                 keepString("image",sharedpreferences.getString(album+"/image",""));
                 keepString("url",sharedpreferences.getString(album+"/"+albumItems.get(prev),""));
                 play(context);
@@ -216,7 +215,7 @@ public class playService extends Service {
             int next = albumItems.indexOf(topic) + 1;
             if (next < albumItems.size()) {
                 keepString("topic",albumItems.get(next));
-                keepString("subject", album);
+                keepString("subject", album.substring(album.indexOf("/")+1));
                 keepString("image",sharedpreferences.getString(album+"/image",""));
                 keepString("url",sharedpreferences.getString(album+"/"+albumItems.get(next),""));
                 play(context);

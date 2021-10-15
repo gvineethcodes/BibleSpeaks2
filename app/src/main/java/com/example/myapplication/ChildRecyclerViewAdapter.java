@@ -68,7 +68,7 @@ public class ChildRecyclerViewAdapter extends RecyclerView.Adapter<ChildRecycler
             Collections.sort(albumItems);
             String topic = albumItems.get(0);
             keepString("topic", topic);
-            keepString("subject", album);
+            keepString("subject", album.substring(album.indexOf("/")+1));
             keepString("image", albumDetails.getAlbumImage());
             keepString("url", sharedpreferences.getString(album + "/" + topic, ""));
             keepString("album",album);
