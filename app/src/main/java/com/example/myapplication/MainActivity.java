@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     public static AlarmManager staticAlarmManager;
     public static Intent staticIntent;
     public static PendingIntent staticPendingIntent;
+    public static Calendar calendar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                             String[] splitStr = inputLine.split(",");
                             keepFloat(Float.parseFloat(splitStr[1]));
                             keepString("updateUrl",splitStr[2]);
-                            button.setVisibility(1.0 < sharedpreferences.getFloat("version", (float) -1.0) ? View.VISIBLE : View.INVISIBLE);
+                            button.setVisibility(1.1 < sharedpreferences.getFloat("version", (float) -1.0) ? View.VISIBLE : View.INVISIBLE);
 
                         }
                     }
@@ -187,12 +190,16 @@ public class MainActivity extends AppCompatActivity {
             keepBool("one",false);
 
         }
+/*
         Calendar calendar = Calendar.getInstance();
 
-        if (sharedpreferences.getBoolean("checkBox", true) && staticPendingIntent == null && staticAlarmManager == null && calendar.get(Calendar.HOUR_OF_DAY)<22) {
+        //if (sharedpreferences.getBoolean("checkBox", true) && staticPendingIntent == null && staticAlarmManager == null && calendar.get(Calendar.HOUR_OF_DAY)<22)
+        if(true&&true&&true&&false)
+        {
             setAlarming(this);
             //Toast.makeText(this, "a", Toast.LENGTH_SHORT).show();
         }
+*/
 
     }
 
@@ -346,7 +353,8 @@ public class MainActivity extends AppCompatActivity {
                 staticAlarmManager.cancel(staticPendingIntent);
         });
 
-        button.setOnClickListener(view -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sharedpreferences.getString("updateUrl","http://www.google.com")))));
+        button.setOnClickListener(view -> MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sharedpreferences.getString("updateUrl", "http://www.google.com")))));
+
 
     }
 
@@ -395,7 +403,8 @@ public class MainActivity extends AppCompatActivity {
 
         staticAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
 
-        Calendar calendar = Calendar.getInstance();
+        calendar = Calendar.getInstance();
+
 
         if (calendar.get(Calendar.HOUR_OF_DAY) <=2) {
             calendar.set(Calendar.HOUR_OF_DAY, 4);
